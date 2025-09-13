@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart'; // ensure flutter_svg is in pubspec.yaml
 import '../theme/app_theme.dart'; // theme tokens (kPrimary, kRadius, etc.)
+import 'home_page.dart' as home_page; // import with prefix to avoid symbol conflicts
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -10,6 +12,8 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController _usernameController = TextEditingController();
+
   final List<String> _projects = ['Select Project', 'Project A', 'Project B', 'Project C'];
   String _selectedProject = 'Select Project';
   bool _remember = false;
@@ -18,12 +22,35 @@ class _LoginPageState extends State<LoginPage> {
   String? _password;
 
   @override
+  void dispose() {
+    _usernameController.dispose();
+    super.dispose();
+  }
+
+  void _onLoginPressed() {
+    if (_formKey.currentState?.validate() ?? false) {
+      _formKey.currentState?.save();
+      _username = _usernameController.text;
+
+      // Navigate to HomePage and replace the current route so user can't go back to login
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const home_page.HomePage()),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     final borderColor = theme.dividerColor;
     final media = MediaQuery.of(context).size;
-    
+
+    // Common InputDecoration settings helper
+    OutlineInputBorder _outline(double radius) => OutlineInputBorder(
+          borderRadius: BorderRadius.circular(kRadius),
+          borderSide: BorderSide(color: borderColor),
+        );
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -38,19 +65,30 @@ class _LoginPageState extends State<LoginPage> {
                 children: [
                   const SizedBox(height: 8),
 
+                  // Top logo (SVG)
                   SizedBox(
-                    height: 110,
-                    child: Image.asset(
-                      'assets/images/logo.jpg',
+                    height: 70,
+                    child: SvgPicture.asset(
+                      'assets/images/logo.svg',
                       fit: BoxFit.contain,
-                      errorBuilder: (c, e, s) =>
-                          Icon(Icons.business, size: 84, color: kPrimary.withOpacity(0.28)),
+                      semanticsLabel: 'App Logo',
+                      placeholderBuilder: (context) => Image.asset(
+                        'assets/images/logo.jpg',
+                        fit: BoxFit.contain,
+                        errorBuilder: (c, e, s) => Icon(Icons.business, size: 84, color: kPrimary.withOpacity(0.28)),
+                      ),
                     ),
                   ),
 
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 28),
 
-                  Text('Log in', style: textTheme.headlineLarge),
+                  // Param card (reduced logo size)
+                  _buildBrandCard(context),
+
+                  // increased gap above "Log in"
+                  const SizedBox(height: 38),
+
+                  Text('Log in', style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700, fontSize: 26)),
 
                   const SizedBox(height: 20),
 
@@ -58,53 +96,70 @@ class _LoginPageState extends State<LoginPage> {
                     key: _formKey,
                     child: Column(
                       children: [
-                        InkWell(
-                          onTap: _showProjectPicker,
-                          borderRadius: BorderRadius.circular(kRadius),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              border: Border.all(color: borderColor),
-                              borderRadius: BorderRadius.circular(kRadius),
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.work_outline, color: kPrimary),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    _selectedProject,
-                                    style: TextStyle(
-                                      color: _selectedProject == 'Select Project'
-                                          ? Colors.grey
-                                          : Colors.black,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ),
-                                const Icon(Icons.chevron_right, color: Colors.grey),
-                              ],
-                            ),
-                          ),
-                        ),
-
                         const SizedBox(height: 16),
 
+                        // Username with SVG icon + refresh suffix (smaller icon area)
                         TextFormField(
-                          onSaved: (v) => _username = v,
+                          controller: _usernameController,
+                          onSaved: (v) => _username = _usernameController.text,
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) return 'Please enter username';
                             return null;
                           },
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             hintText: 'User Name',
-                            prefixIcon: Icon(Icons.person_outline),
+                            isDense: true,
+                            contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                            prefixIconConstraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                            prefixIcon: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: Center(
+                                  child: SvgPicture.asset(
+                                    'assets/images/user.svg',
+                                    width: 18,
+                                    height: 18,
+                                    fit: BoxFit.scaleDown,
+                                    placeholderBuilder: (ctx) => const SizedBox(width: 18, height: 18),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            suffixIconConstraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                            suffixIcon: IconButton(
+                              splashRadius: 20,
+                              padding: const EdgeInsets.only(right: 8.0),
+                              onPressed: () {
+                                _usernameController.clear();
+                                setState(() => _username = null);
+                              },
+                              icon: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: SvgPicture.asset(
+                                  'assets/images/refresh.svg',
+                                  width: 20,
+                                  height: 20,
+                                  fit: BoxFit.scaleDown,
+                                  placeholderBuilder: (ctx) => const Icon(Icons.refresh, size: 20),
+                                ),
+                              ),
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            enabledBorder: _outline(kRadius),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(kRadius),
+                              borderSide: BorderSide(color: kPrimary),
+                            ),
                           ),
                         ),
 
                         const SizedBox(height: 16),
 
+                        // Password (SVG lock icon) with smaller icon area
                         TextFormField(
                           onSaved: (v) => _password = v,
                           validator: (v) {
@@ -114,10 +169,36 @@ class _LoginPageState extends State<LoginPage> {
                           obscureText: _obscure,
                           decoration: InputDecoration(
                             hintText: 'Enter your password',
-                            prefixIcon: const Icon(Icons.lock_outline),
+                            isDense: true,
+                            contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                            prefixIconConstraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                            prefixIcon: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: Center(
+                                  child: SvgPicture.asset(
+                                    'assets/images/lock.svg',
+                                    width: 20,
+                                    height: 20,
+                                    fit: BoxFit.scaleDown,
+                                    placeholderBuilder: (ctx) => const SizedBox(width: 20, height: 20),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            suffixIconConstraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                             suffixIcon: IconButton(
-                              icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
+                              icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility, color: Colors.grey),
                               onPressed: () => setState(() => _obscure = !_obscure),
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            enabledBorder: _outline(kRadius),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(kRadius),
+                              borderSide: BorderSide(color: kPrimary),
                             ),
                           ),
                         ),
@@ -137,7 +218,7 @@ class _LoginPageState extends State<LoginPage> {
 
                         const SizedBox(height: 10),
 
-                        // Use named route to go to /home
+                        // Login button
                         SizedBox(
                           width: double.infinity,
                           height: 52,
@@ -182,13 +263,55 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void _onLoginPressed() {
-    if (_formKey.currentState?.validate() ?? false) {
-      _formKey.currentState?.save();
-
-      // navigate to home route and replace login route
-      Navigator.pushReplacementNamed(context, '/home');
-    }
+  Widget _buildBrandCard(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      // increased vertical padding for more top & bottom space
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 22),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 18, offset: const Offset(0, 8)),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // reduced logo container and icon size
+          Container(
+            height: 36, // reduced from 46
+            width: 36, // reduced from 46
+            decoration: BoxDecoration(color: kPrimary, borderRadius: BorderRadius.circular(10)),
+            child: Center(
+              child: SvgPicture.asset(
+                'assets/images/home.svg',
+                width: 16, // reduced from 22
+                height: 16, // reduced from 22
+                fit: BoxFit.scaleDown,
+                placeholderBuilder: (ctx) => Icon(Icons.home, color: Colors.white, size: 16),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // added margin-top before the Param title
+                const SizedBox(height: 6),
+                Text('Param', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: kPrimary)),
+                const SizedBox(height: 4),
+                Text('Quality Excellence Portal', style: Theme.of(context).textTheme.bodySmall),
+                const SizedBox(height: 8),
+                Container(height: 3, width: 86, decoration: BoxDecoration(color: kPrimary, borderRadius: BorderRadius.circular(4))),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showProjectPicker() {
@@ -208,7 +331,17 @@ class _LoginPageState extends State<LoginPage> {
               Divider(height: 1, color: Theme.of(context).dividerColor),
               ..._projects.map((p) {
                 return ListTile(
-                  leading: const Icon(Icons.business_outlined, color: kPrimary),
+                  leading: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: SvgPicture.asset(
+                      'assets/images/business.svg',
+                      width: 22,
+                      height: 22,
+                      fit: BoxFit.scaleDown,
+                      placeholderBuilder: (ctx) => const Icon(Icons.business_outlined),
+                    ),
+                  ),
                   title: Text(p, style: Theme.of(context).textTheme.bodyMedium),
                   onTap: () {
                     setState(() => _selectedProject = p);

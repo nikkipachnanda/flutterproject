@@ -20,7 +20,11 @@ class AppColors extends ThemeExtension<AppColors> {
 
   const AppColors({this.primary, this.accent, this.border});
 
-  @override
+/*************  ✨ Windsurf Command ⭐  *************/
+  /// Create a new [AppColors] that is a copy of this one, but with the given
+  /// fields replaced. If a field is not provided, the corresponding field from
+  /// this object is used.
+/*******  274214d0-266f-4415-95a5-5d20e53f3869  *******/  @override
   AppColors copyWith({Color? primary, Color? accent, Color? border}) {
     return AppColors(
       primary: primary ?? this.primary,
