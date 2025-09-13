@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 // ---------------------------------------------------------
 
 // Brand colors
-const Color kPrimary = Color(0xFFED5D2F);
+const Color kPrimary = Color(0xFFE34C23);
 const Color kAccent = Color(0xFFFC8A5A);
-const Color kBorder = Color(0xFFE9E9E9);
+const Color kBorder = Color(0xFFE5E7EB);
 const double kRadius = 12.0;
 
 @immutable

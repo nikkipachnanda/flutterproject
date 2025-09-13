@@ -109,7 +109,7 @@ class _LoginPageState extends State<LoginPage> {
                           decoration: InputDecoration(
                             hintText: 'User Name',
                             isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 18),
                             prefixIconConstraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                             prefixIcon: Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -157,7 +157,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
 
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 32),
 
                         // Password (SVG lock icon) with smaller icon area
                         TextFormField(
@@ -170,7 +170,7 @@ class _LoginPageState extends State<LoginPage> {
                           decoration: InputDecoration(
                             hintText: 'Enter your password',
                             isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 18),
                             prefixIconConstraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                             prefixIcon: Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -314,46 +314,5 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void _showProjectPicker() {
-    showModalBottomSheet<void>(
-      context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(12))),
-      builder: (ctx) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 12),
-              Container(height: 6, width: 60, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(4))),
-              const SizedBox(height: 12),
-              Text('Select Project', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
-              const SizedBox(height: 12),
-              Divider(height: 1, color: Theme.of(context).dividerColor),
-              ..._projects.map((p) {
-                return ListTile(
-                  leading: SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: SvgPicture.asset(
-                      'assets/images/business.svg',
-                      width: 22,
-                      height: 22,
-                      fit: BoxFit.scaleDown,
-                      placeholderBuilder: (ctx) => const Icon(Icons.business_outlined),
-                    ),
-                  ),
-                  title: Text(p, style: Theme.of(context).textTheme.bodyMedium),
-                  onTap: () {
-                    setState(() => _selectedProject = p);
-                    Navigator.of(ctx).pop();
-                  },
-                );
-              }).toList(),
-              const SizedBox(height: 12),
-            ],
-          ),
-        );
-      },
-    );
-  }
+  
 }
