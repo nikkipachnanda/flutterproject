@@ -149,7 +149,10 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             filled: true,
                             fillColor: Colors.white,
-                            enabledBorder: _outline(kRadius),
+                            enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(kRadius),
+                                borderSide: BorderSide(color: kBorder, width: 1),
+                            ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(kRadius),
                               borderSide: BorderSide(color: kPrimary),
@@ -195,7 +198,10 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             filled: true,
                             fillColor: Colors.white,
-                            enabledBorder: _outline(kRadius),
+                            enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(kRadius),
+                                borderSide: BorderSide(color: kBorder, width: 1),
+                            ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(kRadius),
                               borderSide: BorderSide(color: kPrimary),
@@ -221,7 +227,7 @@ class _LoginPageState extends State<LoginPage> {
                         // Login button
                         SizedBox(
                           width: double.infinity,
-                          height: 52,
+                          height: 60,
                           child: ElevatedButton(
                             onPressed: _onLoginPressed,
                             style: ElevatedButton.styleFrom(

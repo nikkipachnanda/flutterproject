@@ -4,6 +4,8 @@ import 'pages/login_page.dart';
 import 'pages/home_page.dart';
 import 'pages/about_page.dart';
 import 'pages/contact_page.dart';
+import 'theme/app_theme.dart'; 
+
 
 void main() {
   runApp(const MyApp());
