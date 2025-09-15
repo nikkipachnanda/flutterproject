@@ -78,7 +78,7 @@ class _HomePageState extends State<HomePage> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.white, // from app_theme
+      backgroundColor: Colors.white, // force body white
       appBar: AppBar(
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -86,7 +86,7 @@ class _HomePageState extends State<HomePage> {
         centerTitle: false,
         title: Row(
           children: [
-            Image.asset('assets/images/logo.jpg', height: 128, width: 128, fit: BoxFit.contain),
+            Image.asset('assets/images/logo.jpg', height: 48, width: 48, fit: BoxFit.contain),
           ],
         ),
         actions: [
@@ -177,88 +177,100 @@ class _HomePageState extends State<HomePage> {
   void _openProjectList() {
     final appColors = Theme.of(context).extension<AppColors>();
     final borderColor = appColors?.border ?? kBorder;
+
+    // Show a full-screen bottom sheet (covers 100%) with white background.
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(12))),
+      backgroundColor: Colors.transparent, // let inner container provide the white background
       builder: (ctx) {
-        return FractionallySizedBox(
-          heightFactor: 0.75,
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(height: 6, width: 60, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(4))),
-                  const SizedBox(height: 12),
-                  Row(
+        final mq = MediaQuery.of(ctx);
+        return SizedBox(
+          height: mq.size.height, // full screen height
+          child: ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+            child: Container(
+              color: Colors.white, // full white background for the "Select Projects" page
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
                     children: [
-                      IconButton(padding: EdgeInsets.zero, onPressed: () => Navigator.of(ctx).pop(), icon: const Icon(Icons.arrow_back)),
-                      const SizedBox(width: 8),
-                      const Text('Back to Dashboard', style: TextStyle(fontWeight: FontWeight.w700)),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  const Align(alignment: Alignment.centerLeft, child: Text('Select Projects', style: TextStyle(fontWeight: FontWeight.w700))),
-                  const SizedBox(height: 12),
-                  Expanded(
-                    child: ListView.separated(
-                      itemCount: _projects.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (context, idx) {
-                        final p = _projects[idx];
-                        final isSelected = p.name == _selectedProjectName;
-                        final appColorsLocal = Theme.of(context).extension<AppColors>();
+                      // top grabber + header
+                      Container(height: 6, width: 60, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(4))),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          IconButton(padding: EdgeInsets.zero, onPressed: () => Navigator.of(ctx).pop(), icon: const Icon(Icons.arrow_back)),
+                          const SizedBox(width: 8),
+                          const Text('Back to Dashboard', style: TextStyle(fontWeight: FontWeight.w700)),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Align(alignment: Alignment.centerLeft, child: Text('Select Projects', style: TextStyle(fontWeight: FontWeight.w700, color: appColors?.selectionDark ?? kSelectionDark))),
+                      const SizedBox(height: 12),
+                      // Full-height list
+                      Expanded(
+                        child: ListView.separated(
+                          itemCount: _projects.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: 12),
+                          itemBuilder: (context, idx) {
+                            final p = _projects[idx];
+                            final isSelected = p.name == _selectedProjectName;
+                            final appColorsLocal = Theme.of(context).extension<AppColors>();
 
-                        // resolve highlighted project background using tokens (fallbacks are in app_theme.dart)
-                        final bg = _resolveProjectBgFromKey(p.colorKey, appColorsLocal);
+                            // resolve highlighted project background using tokens (fallbacks are in app_theme.dart)
+                            final bg = _resolveProjectBgFromKey(p.colorKey, appColorsLocal);
 
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() => _selectedProjectName = p.name);
-                            Navigator.of(context).pop();
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                            decoration: BoxDecoration(
-                              color: appColorsLocal?.selectionWhite ?? kSelectionWhite,
-                              borderRadius: BorderRadius.circular(kRadius),
-                              border: Border.all(color: isSelected ? (appColorsLocal?.primary ?? kPrimary) : borderColor, width: isSelected ? 2 : 1),
-                              boxShadow: const [BoxShadow(color: Color(0x08000000), blurRadius: 8, offset: Offset(0, 6))],
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                    Text(p.name, style: TextStyle(fontWeight: FontWeight.w800, color: appColorsLocal?.selectionDark ?? kSelectionDark)),
-                                    const SizedBox(height: 6),
-                                    Text(p.location, style: TextStyle(color: appColorsLocal?.selectionGrey ?? kSelectionGrey)),
-                                  ]),
+                            return GestureDetector(
+                              onTap: () {
+                                setState(() => _selectedProjectName = p.name);
+                                Navigator.of(ctx).pop();
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                decoration: BoxDecoration(
+                                  color: appColorsLocal?.selectionWhite ?? kSelectionWhite,
+                                  borderRadius: BorderRadius.circular(kRadius),
+                                  border: Border.all(color: isSelected ? (appColorsLocal?.primary ?? kPrimary) : borderColor, width: isSelected ? 2 : 1),
+                                  boxShadow: const [BoxShadow(color: Color(0x08000000), blurRadius: 8, offset: Offset(0, 6))],
                                 ),
-
-                                // stacked counts: pending and total
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                child: Row(
                                   children: [
-                                    Text('${p.pending}', style: TextStyle(color: (appColorsLocal?.primary ?? kPrimary), fontWeight: FontWeight.w800, fontSize: 16)),
-                                    const SizedBox(height: 6),
-                                    Text('${p.total}', style: TextStyle(color: appColorsLocal?.selectionGrey ?? kSelectionGrey)),
+                                    // left column: name + location
+                                    Expanded(
+                                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                        Text(p.name, style: TextStyle(fontWeight: FontWeight.w800, color: appColorsLocal?.selectionDark ?? kSelectionDark)),
+                                        const SizedBox(height: 6),
+                                        Text(p.location, style: TextStyle(color: appColorsLocal?.selectionGrey ?? kSelectionGrey)),
+                                      ]),
+                                    ),
+
+                                    // middle: pending / total stacked vertically
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      children: [
+                                        Text('${p.pending}', style: TextStyle(color: (appColorsLocal?.primary ?? kPrimary), fontWeight: FontWeight.w800, fontSize: 16)),
+                                        const SizedBox(height: 6),
+                                        Text('${p.total}', style: TextStyle(color: appColorsLocal?.selectionGrey ?? kSelectionGrey)),
+                                      ],
+                                    ),
+
+                                    const SizedBox(width: 12),
+
+                                    // right: percent + label
+                                    _projectPercentWidget(p.pending, p.total),
                                   ],
                                 ),
-
-                                const SizedBox(width: 12),
-
-                                // percent indicator (right)
-                                _projectPercentWidget(p.pending, p.total),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -403,8 +415,7 @@ class _HomePageState extends State<HomePage> {
     final double progress = d.total == 0 ? 0 : (d.pending / d.total);
 
     return Container(
-     // margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 4), 
-      margin: const EdgeInsets.only(bottom: 20, top:20),
+      margin: const EdgeInsets.only(bottom: 20, top: 20),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: selectionWhite,
